@@ -103,7 +103,8 @@ ymaps.ready(function init(){
 								//firstGeoObject.getAddressLine()
 							].filter(Boolean).join(', '),
 							// В качестве контента балуна задаем строку с адресом объекта.
-							balloonContent: firstGeoObject.getAddressLine()
+							//balloonContent: firstGeoObject.getAddressLine()
+							balloonContent: window.gpsJavaScriptInterface.getUserLocation()
 						});
 				});
 			}
