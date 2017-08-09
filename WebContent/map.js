@@ -178,6 +178,8 @@ ymaps.ready(function init(){
 							//balloonContent: firstGeoObject.getAddressLine()
 							balloonContent: window.gpsJavaScriptInterface.getUserLatitude() + "_" + window.gpsJavaScriptInterface.getUserLongitude()
 						});
+					
+					window.adresTextViewJSInterface.updateAdresView(firstGeoObject.getAddressLine());
 				});
 			}
 		});
