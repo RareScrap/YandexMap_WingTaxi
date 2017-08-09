@@ -45,6 +45,10 @@ ymaps.ready(function init(){
 		        _onBtnClick: function (e) {
 		        	var coords = [parseFloat(window.gpsJavaScriptInterface.getUserLongitude()), parseFloat(window.gpsJavaScriptInterface.getUserLatitude())];
 
+		        	myMap.panTo(coords, {
+		                flying: 1
+		            })
+		        	
 					// Если метка уже создана – просто передвигаем ее.
 					if (myPlacemark) {
 						myPlacemark.geometry.setCoordinates(coords);
