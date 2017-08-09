@@ -1,3 +1,7 @@
+function GeolocationButton(params, options) {
+    GeolocationButton.superclass.constructor.call(this, params, options);
+}
+
 ymaps.ready(function init(){
 			var myPlacemark,
 				myMap = new ymaps.Map('map', {
@@ -7,6 +11,63 @@ ymaps.ready(function init(){
 				});
 
 			myMap.options.set('yandexMapDisablePoiInteractivity', true);
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			ymaps.util.augment(GeolocationButton, ymaps.control.Button, {
+		        onAddToMap: function () {
+		            GeolocationButton.superclass.onAddToMap.apply(this, arguments);
+
+		            ymaps.option.presetStorage.add('geolocation#icon', {
+		                iconImageHref: 'man.png',
+		                iconImageSize: [27, 26],
+		                iconImageOffset: [-10, -24]
+		            });
+
+		            // Обрабатываем клик на кнопке.
+		            this.events.add('click', this._onBtnClick, this);
+		        },
+		        onRemoveFromMap: function () {
+		            this.events.remove('click', this._onBtnClick, this);
+		            this.hint = null;
+		            ymaps.option.presetStorage.remove('geolocation#icon');
+
+		            GeolocationButton.superclass.onRemoveFromMap.apply(this, arguments);
+		        },
+		        _onBtnClick: function (e) {
+		        	var coords = [parseFloat(window.gpsJavaScriptInterface.getUserLongitude()), parseFloat(window.gpsJavaScriptInterface.getUserLatitude())];
+
+					// Если метка уже создана – просто передвигаем ее.
+					if (myPlacemark) {
+						myPlacemark.geometry.setCoordinates(coords);
+					}
+					// Если нет – создаем.
+					else {
+						myPlacemark = createPlacemark(coords);
+						myMap.geoObjects.add(myPlacemark);
+						// Слушаем событие окончания перетаскивания на метке.
+						myPlacemark.events.add('dragend', function () {
+							getAddress(myPlacemark.geometry.getCoordinates());
+						});
+					}
+
+					getAddress(coords);
+		        },
+		        toggleIconImage: function (image) {
+		            this.data.set('image', image);
+		        }
+		        
+		    });
+			
+			
 
 			// Создание кнопки определения местоположения
             var button = new GeolocationButton({
@@ -22,6 +83,17 @@ ymaps.ready(function init(){
                 selectOnClick: false
             });
             myMap.controls.add(button, { top : 5, left : 5 });
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
 
 			myPlacemark = createPlacemark([52.286387, 104.280660]);
 			myMap.geoObjects.add(myPlacemark);
@@ -104,7 +176,7 @@ ymaps.ready(function init(){
 							].filter(Boolean).join(', '),
 							// В качестве контента балуна задаем строку с адресом объекта.
 							//balloonContent: firstGeoObject.getAddressLine()
-							balloonContent: window.gpsJavaScriptInterface.getUserLocation()
+							balloonContent: window.gpsJavaScriptInterface.getUserLatitude() + "_" + window.gpsJavaScriptInterface.getUserLongitude()
 						});
 				});
 			}
