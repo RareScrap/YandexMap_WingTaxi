@@ -22,33 +22,10 @@ function init () {
         boundsAutoApply: true
     });
 
-    trafficButton.events.add('deselect', function () {
-        multiRoute.model.setParams({ avoidTrafficJams: false }, true);
-    });
-
-    viaPointButton.events.add('select', function () {
-        var referencePoints = multiRoute.model.getReferencePoints();
-        referencePoints.splice(1, 0, "Москва, ул. Солянка, 7");
-        /**
-         * Добавляем транзитную точку в модель мультимаршрута.
-         * Обратите внимание, что транзитные точки могут находится только
-         * между двумя путевыми точками, т.е. не могут быть крайними точками маршрута.
-         * @see https://api.yandex.ru/maps/doc/jsapi/2.1/ref/reference/multiRouter.MultiRouteModel.xml#setReferencePoints
-         */
-        multiRoute.model.setReferencePoints(referencePoints, [1]);
-    });
-
-    viaPointButton.events.add('deselect', function () {
-        var referencePoints = multiRoute.model.getReferencePoints();
-        referencePoints.splice(1, 1);
-        multiRoute.model.setReferencePoints(referencePoints, []);
-    });
-
     // Создаем карту с добавленными на нее кнопками.
     var myMap = new ymaps.Map('map', {
         center: [55.750625, 37.626],
         zoom: 7,
-        controls: [trafficButton, viaPointButton]
     }, {
         buttonMaxWidth: 300
     });
