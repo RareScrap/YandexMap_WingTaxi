@@ -184,6 +184,9 @@ ymaps.ready(function init(){
 						});
 					
 					window.adresTextViewJSInterface.updateAdresView(firstGeoObject.getAddressLine());
+					
+					// Информируем окружение, что карта загружена
+					window.mapReadyJSInterface.mapReady();
 				});
 			}
 		});
