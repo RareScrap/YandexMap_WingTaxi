@@ -36,6 +36,11 @@ function init () {
     }, {
         buttonMaxWidth: 300
     });
+   
+    // Ожидаем успешного построения маршрута
+    multiRoute.model.events.add("requestsuccess", function(){
+		window.updateDataJSInterface.updateRouteLength( multiRoute.getActiveRoute().properties.get('distance').value );
+	});
 
     // Добавляем мультимаршрут на карту.
     myMap.geoObjects.add(multiRoute);
