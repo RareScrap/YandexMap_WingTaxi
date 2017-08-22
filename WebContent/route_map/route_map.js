@@ -2,12 +2,12 @@ function init () {
 	/**
 	 * Тестовый массив с метками адресов
 	 */
-	var adresses = [
-		  [52.282071, 104.287999],
-		  [52.276622, 104.316408],
-		  [52.262905, 104.302418],
-		  [52.225794, 104.311010]
-		];
+	var arr = new Array();
+	for(var i=0; i<window.getDataJSInterface.getRoutePointsNumber(); i++){
+	    arr[i] = new Array();
+	    arr[i][0] = window.getDataJSInterface.getRoutePointCoord(i, 0);
+	    arr[i][1] = window.getDataJSInterface.getRoutePointCoord(i, 1);
+	  }
 	
     /**
      * Создаем мультимаршрут.
@@ -18,12 +18,7 @@ function init () {
      */
     var multiRoute = new ymaps.multiRouter.MultiRoute({
         // Описание опорных точек мультимаршрута.
-        referencePoints: [
-          [52.282071, 104.287999],
-  		  [52.276622, 104.316408],
-  		  [52.262905, 104.302418],
-  		  [52.225794, 104.311010]
-        ]
+        referencePoints: arr
     }, {
         // Автоматически устанавливать границы карты так, чтобы маршрут был виден целиком.
         boundsAutoApply: true
