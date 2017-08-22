@@ -180,10 +180,12 @@ ymaps.ready(function init(){
 							].filter(Boolean).join(', '),
 							// В качестве контента балуна задаем строку с адресом объекта.
 							//balloonContent: firstGeoObject.getAddressLine()
-							balloonContent: window.gpsJavaScriptInterface.getUserLatitude() + "_" + window.gpsJavaScriptInterface.getUserLongitude()
+							
+							// Тестовая строка для тестирования GPS
+							//balloonContent: window.gpsJavaScriptInterface.getUserLatitude() + "_" + window.gpsJavaScriptInterface.getUserLongitude()
 						});
 					
-					window.adresTextViewJSInterface.updateAdresView(firstGeoObject.getAddressLine());
+					window.updateDataJSInterface.updateAddress(coords[0], coords[1], firstGeoObject.getAddressLine());
 					
 					// Информируем окружение, что карта загружена
 					window.mapReadyJSInterface.mapReady();
