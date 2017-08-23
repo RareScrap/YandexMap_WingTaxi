@@ -35,7 +35,18 @@ function init () {
     // Ожидаем успешного построения маршрута
     multiRoute.model.events.add("requestsuccess", function(){
 		window.updateDataJSInterface.updateRouteLength( multiRoute.getActiveRoute().properties.get('distance').value );
-	});
+		
+		// Возвращает пиздец, если расстояние огромно
+		//window.console.log( multiRoute.getActiveRoute().properties.get('durationInTraffic').value );
+		
+		var s = multiRoute.getActiveRoute().properties.get('duration').value;
+		var m = (s/60) % 60;
+		window.console.log(m);
+		var h = s / 3600;
+		window.console.log(h);
+		
+		window.updateDataJSInterface.updateTripTime(h, m);
+    });
 
     // Добавляем мультимаршрут на карту.
     myMap.geoObjects.add(multiRoute);
