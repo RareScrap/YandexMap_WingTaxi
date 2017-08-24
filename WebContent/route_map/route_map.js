@@ -28,6 +28,7 @@ function init () {
     var myMap = new ymaps.Map('map', {
         center: [55.750625, 37.626],
         zoom: 7,
+        controls: ['zoomControl']
     }, {
         buttonMaxWidth: 300
     });
