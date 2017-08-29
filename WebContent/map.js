@@ -377,11 +377,19 @@ function carsDriver() {
 	  //alert( "тик" );
 	  s--;
 	  try {
-	  	var pm= createPlacemark(car[s]);
-	  	mapOutside.geoObjects.add(pm);
+		  if (metka) {
+			  metka.geometry.setCoordinates(car[s]);
+			}
+			// Если нет – создаем.
+			else {
+				var pm= createPlacemark(car[s]);
+			  	metka = pm;
+			  	mapOutside.geoObjects.add(pm);
+			}
 	  } catch (err) {}
 	}
 
+var metka;
 var s = 171;
 setInterval(carsDriver, 1000);
 
