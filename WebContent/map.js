@@ -1,55 +1,72 @@
+/**
+ * Функция-конструтор GPS контрола для Яндекс карты
+ * @param params Параменры контрола (модель функциональности?)
+ * @param options Опции контрола (модель поведения?)
+ * @returns GPS контрол
+ */
 function GeolocationButton(params, options) {
     GeolocationButton.superclass.constructor.call(this, params, options);
 }
 
 
-
+/**
+ * Переменная, предоставляющая доступ к переменной внутри функции init()
+ */
 var mapOutside;
 
+/**
+ * Основной скрипт карты. Инициализирует карту.
+ */
 ymaps.ready(function init(){
-	var myPlacemark,
-		myMap = new ymaps.Map('map', {
-			center: [52.286387, 104.280660],
+	// Создаем обьект карты
+	var myMap = new ymaps.Map('map', {
+			center: [52.286387, 104.280660], // Центрируем на сквере кирова
 			zoom: 15,
-			controls: ['zoomControl', 'fullscreenControl']
+			controls: ['zoomControl']
 		});
-
+	
+	// Отключаем интерактивность (инфу по клику на значки)
 	myMap.options.set('yandexMapDisablePoiInteractivity', true);
 	
-
+	// Создаем обьект первоначальной метки
+	var myPlacemark = createPlacemark([52.286387, 104.280660]); // Место - сквер кирово
+	myMap.geoObjects.add(myPlacemark); // Добавляем метку на карту
+	getAddress([52.286387, 104.280660]); // Получаем инфу о месте в хит метки (myPlacemark уже есть в getAddress())
 	
-	
-	
-	
-	
-	
-	
-	
+	// Задаем функционал GPS контрола
 	ymaps.util.augment(GeolocationButton, ymaps.control.Button, {
+		// Добавление контрола на карту
         onAddToMap: function () {
             GeolocationButton.superclass.onAddToMap.apply(this, arguments);
-
             ymaps.option.presetStorage.add('geolocation#icon', {
                 iconImageHref: 'man.png',
                 iconImageSize: [27, 26],
                 iconImageOffset: [-10, -24]
             });
 
-            // Обрабатываем клик на кнопке.
+            // Установка обработчика клика по кнопке
             this.events.add('click', this._onBtnClick, this);
         },
+        // Функция удаления контрола
         onRemoveFromMap: function () {
             this.events.remove('click', this._onBtnClick, this);
             this.hint = null;
             ymaps.option.presetStorage.remove('geolocation#icon');
 
+            // Вызов суперкласса
             GeolocationButton.superclass.onRemoveFromMap.apply(this, arguments);
         },
+        // Вызывается при клике на кнопку
         _onBtnClick: function (e) {
-        	var coords = [0, 0]//[parseFloat(window.gpsJavaScriptInterface.getUserLongitude()), parseFloat(window.gpsJavaScriptInterface.getUserLatitude())];
+        	// Отладочные координаты
+        	var coords = [0, 0];
+        	// Получение кооднинат с устройства
+        	//var coords = [parseFloat(window.gpsJavaScriptInterface.getUserLongitude()), parseFloat(window.gpsJavaScriptInterface.getUserLatitude())];
 
+        	// Установить центр карты в точке coords
         	myMap.panTo(coords, {
-                flying: 1
+        		// Разрешает уменьшать и затем увеличивать зум карты при перемещении к заданной точке
+                flying: true
             })
         	
 			// Если метка уже создана – просто передвигаем ее.
@@ -60,23 +77,23 @@ ymaps.ready(function init(){
 			else {
 				myPlacemark = createPlacemark(coords);
 				myMap.geoObjects.add(myPlacemark);
+				// TODO: Удалить
 				// Слушаем событие окончания перетаскивания на метке.
 				myPlacemark.events.add('dragend', function () {
 					getAddress(myPlacemark.geometry.getCoordinates());
 				});
 			}
 
+        	// TODO: Хачем это?
 			getAddress(coords);
         },
+        // Создает эффект нажатой кнопки
         toggleIconImage: function (image) {
             this.data.set('image', image);
         }
-        
     });
 	
-	
-
-	// Создание кнопки определения местоположения
+	// Создаем GPS контрол с заданным функционалом
     var button = new GeolocationButton({
         data : {
             image : 'wifi.png',
@@ -86,38 +103,16 @@ ymaps.ready(function init(){
             enableHighAccuracy : true // Режим получения наиболее точных данных
         }
     }, {
+    	// TODO: Зачем это?
         // Зададим опции для кнопки.
         selectOnClick: false
     });
+    // Добавим GPS контрол на карту
     myMap.controls.add(button, { top : 5, left : 5 });
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
-	myPlacemark = createPlacemark([52.286387, 104.280660]);
-	myMap.geoObjects.add(myPlacemark);
-	getAddress([52.286387, 104.280660]);
-
-    /*myPlacemark = new ymaps.Placemark([52.286387, 104.280660], {
-        hintContent: 'Иркутск!',
-        balloonContent: 'Заебись'
-    });
-    myMap.geoObjects.add(myPlacemark);*/
-
-
-
-    // Обработка события, возникающего при щелчке
-	// левой кнопкой мыши в любой точке карты.
-	// При возникновении такого события откроем балун.
+    // Обработка события, возникающего при щелчке левой кнопкой мыши в любой точке карты.
 	myMap.events.add('click', function (e) {
+		// Получаем координаты косания 
 		var coords = e.get('coords');
 
 		// Если метка уже создана – просто передвигаем ее.
@@ -128,96 +123,110 @@ ymaps.ready(function init(){
 		else {
 			myPlacemark = createPlacemark(coords);
 			myMap.geoObjects.add(myPlacemark);
+			
+			// TODO: Зачем?
 			// Слушаем событие окончания перетаскивания на метке.
 			myPlacemark.events.add('dragend', function () {
 				getAddress(myPlacemark.geometry.getCoordinates());
 			});
 		}
 
+		// TODO: Зачем?
 		getAddress(coords);
 	});
 	
-
+	/**
+	 * Получает информацию о месте в точке данной и записывае ее в хинт метки myPlacemark
+	 * @param coords Место, о котором нужно получить информацию
+	 */
 	function getAddress(coords) {
+		// Устанавливаем заглушку, когда информация о месте еще не получена
 		myPlacemark.properties.set('iconCaption', 'поиск...');
+		
+		// Обработка полученной информации
 		ymaps.geocode(coords).then(function (res) {
+			// Геообьект, находящийся в точке coords
 			var firstGeoObject = res.geoObjects.get(0);
-			// Название населенного пункта или вышестоящее административно-территориальное образование.
-			// Нужно сохранять город, чтобы передать его на сервер
-			var city = firstGeoObject.getLocalities().length ? firstGeoObject.getLocalities() : firstGeoObject.getAdministrativeAreas()
+			
+			// TODO: Нужно сохранять город, чтобы передать его на сервер
+			// Сохраняем название населенного пункта или вышестоящее административно-территориальное образование
+			var city = firstGeoObject.getLocalities().length ? firstGeoObject.getLocalities() : firstGeoObject.getAdministrativeAreas();
 
+			// Записываем загруженную информацию в хинт myPlacemark
 			myPlacemark.properties
 				.set({
 					// Формируем строку с данными об объекте.
 					iconCaption: [
-						// Название населенного пункта или вышестоящее административно-территориальное образование.
-						// Нужно сохранять город, чтобы передать его на сервер
-						//var city = firstGeoObject.getLocalities().length ? firstGeoObject.getLocalities() : firstGeoObject.getAdministrativeAreas(),
-						// Получаем путь до топонима, если метод вернул null, запрашиваем наименование здания.
+						// Получаем путь до топонима, если метод вернул null, запрашиваем наименование здания. Если и его нет - возвращаем образование внтури района (микрорайон)
 						firstGeoObject.getThoroughfare() || firstGeoObject.getPremise() || firstGeoObject.getLocalities()[1],
+						// Номер здания
 						firstGeoObject.getPremiseNumber()
-						// В качестве контента балуна задаем строку с адресом объекта.
+						
+						// Полный адрес метки
 						//firstGeoObject.getAddressLine()
-					].filter(Boolean).join(', '),
-					// В качестве контента балуна задаем строку с адресом объекта.
-					//balloonContent: firstGeoObject.getAddressLine()
+					].filter(Boolean).join(', '), // Применяем фильтр, разделяя токены адреса запятой
 					
 					// Тестовая строка для тестирования GPS
 					//balloonContent: window.gpsJavaScriptInterface.getUserLatitude() + "_" + window.gpsJavaScriptInterface.getUserLongitude()
 				});
 			
+			// Информирует окружение о том, что метка была передвинута
 			//window.updateDataJSInterface.updateAddress(coords[0], coords[1], firstGeoObject.getAddressLine());
 			
 			// Информируем окружение, что карта загружена
+			// TODO: Это лучшее место для этой строки?
 			//window.mapReadyJSInterface.mapReady();
 		});
 	}
+	
+	/**
+	 * Создает метку выброра адреса
+	 * @param coords Точка, в тоторой нужно создать метку
+	 * @return Созданная метка
+	 */
+	function createPlacemark(coords) {
+		return new ymaps.Placemark(coords, {
+			iconCaption: 'поиск...'
+		}, {
+			preset: 'islands#violetDotIconWithCaption',
+			draggable: false
+		});
+	}
+
+	
+	// Сохранение готовой карты во внешней переменной
 	mapOutside = myMap;
 });
 
-//Обработка события, возникающего при щелчке
-// правой кнопки мыши в любой точке карты.
-// При возникновении такого события покажем всплывающую подсказку
-// в точке щелчка.
-/*myMap.events.add('contextmenu', function (e) {
-	myMap.hint.open(e.get('coords'), 'Кто-то щелкнул правой кнопкой');
-});
-
-// Скрываем хинт при открытии балуна.
-myMap.events.add('balloonopen', function (e) {
-	myMap.hint.close();
-});*/
-
-// Создание метки.
+/**
+ * Создает метку машины такси
+ * @param coords Точка, в тоторой нужно создать метку
+ * @return Созданная метка
+ */
 function createPlacemarkCar(coords) {
 	return new ymaps.Placemark(coords, {}, {
 		iconLayout: 'default#imageWithContent',
 		iconImageHref: 'car.png',
 		iconImageSize: [48, 48],
 		
-		 iconImageOffset: [-24, -48],
-         // Смещение слоя с содержимым относительно слоя с картинкой.
-         //iconContentOffset: [15, 15],
+		// Смещает картинку, чтобы "хвостик" метки указывал прямо на точку дороги
+		iconImageOffset: [-24, -48],
+	    // Смещение слоя с содержимым относительно слоя с картинкой.
+	    //iconContentOffset: [15, 15],
 		
 		preset: 'islands#violetDotIconWithCaption',
+		// Отлючает возможность переноса
 		draggable: false
 	});
 }
 
-function createPlacemark(coords) {
-	return new ymaps.Placemark(coords, {
-		iconCaption: 'поиск...'
-	}, {
-		preset: 'islands#violetDotIconWithCaption',
-		draggable: false
-	});
-}
-
-
-
-
+/**
+ * Функция, содержащая в себе координаты точек маршрута для всех меток машин. При вызове,
+ * выставляет все метки машин в их s-тую точку (s - внешняя переменная).
+ */
 function carsDriver() {
 	  var car = [
+		  // Машина 1
 		  [52.219864, 104.246826],
 		  [52.220045, 104.247206],
 		  [52.220193, 104.247625],
@@ -391,6 +400,7 @@ function carsDriver() {
 		  [52.238040, 104.264698],
 		  [52.238080, 104.264740],
 	  
+		  // Машина 2
 		  [52.275816, 104.287387],
 		  [52.275701, 104.287709],
 		  [52.275552, 104.287940],
