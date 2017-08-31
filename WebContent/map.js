@@ -33,6 +33,58 @@ ymaps.ready(function init(){
 	myMap.geoObjects.add(myPlacemark); // Добавляем метку на карту
 	getAddress([52.286387, 104.280660]); // Получаем инфу о месте в хит метки (myPlacemark уже есть в getAddress())
 	
+	 // Создаем экземпляр класса ymaps.control.SearchControl
+    mySearchControl = new ymaps.control.SearchControl({
+        options: {
+            noPlacemark: false,
+            placeholderContent: "Вы можете ввести адрес самому",
+            size: "auto"
+        }
+    }),
+	// Результаты поиска будем помещать в коллекцию.
+    mySearchResults = new ymaps.GeoObjectCollection(null, {
+        hintContentLayout: ymaps.templateLayoutFactory.createClass('$[properties.name]')
+    });
+    
+    // Добавление контрола на карту
+	myMap.controls.add(mySearchControl);
+	
+	// Обработка кликнутых результатов поиска
+	mySearchControl.events.add('resultselect', function (e) {
+		// Получение результата, по которому был сделан клик
+		var index = e.get('index');
+	    var test = mySearchControl.getResult(index);
+	    
+	    // Обработка полученного результата
+	    mySearchControl.getResult(index).then(function (res) {
+	    	// Получение координат результата
+	    	var coords = res.geometry._coordinates;
+	    	
+			// Если метка уже создана – просто передвигаем ее.
+			if (myPlacemark) {
+				myPlacemark.geometry.setCoordinates(coords);
+			}
+			// Если нет – создаем.
+			else {
+				myPlacemark = createPlacemark(coords);
+				myMap.geoObjects.add(myPlacemark);
+				
+				// TODO: Зачем?
+				// Слушаем событие окончания перетаскивания на метке.
+				myPlacemark.events.add('dragend', function () {
+					getAddress(myPlacemark.geometry.getCoordinates());
+				});
+			}
+			// TODO: Зачем?
+			getAddress(coords);
+	    	
+	    	// Помещаем результат в коллекцию
+	       mySearchResults.add(res);
+	    });
+	}).add('submit', function () { // Очистить результаты поиска при отправке реквеста о получении новых
+	        mySearchResults.removeAll();
+    })
+	
 	// Задаем функционал GPS контрола
 	ymaps.util.augment(GeolocationButton, ymaps.control.Button, {
 		// Добавление контрола на карту
