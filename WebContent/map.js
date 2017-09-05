@@ -675,17 +675,18 @@ var angleBetweenTwoVectors = function(vector1, vector2) {
 }
 
 // test
-var v1 = [52.287574, 104.282753];
-var v2 = [52.287616, 104.282809];
+var v1 = [52.287570, 104.282750];
+var v2 = [52.287570, 104.282700];
 
 var ab = [v2[0]-v1[0], v2[1]-v1[1]];
 var an = [v2[0]-v1[0]+1, v2[1]-v1[1]];
 var n = [v1[0]+1, v1[1]];
-console.log((angleBetweenTwoVectors(ab, an) * (180/3.1415)) + " градусов");
+//console.log((angleBetweenTwoVectors(ab, an) * (180/3.1415)) + " градусов");
 
 var an_perp = [an[1], an[0]];
-console.log( ((ab[0]*an_perp[0]+ab[1]*an_perp[1]) < 0 ? -1 : 1)
-		+ " test");
+var sign =  ((ab[0]*an_perp[0]+ab[1]*an_perp[1]) < 0 ? -1 : 1);
+
+console.log((angleBetweenTwoVectors(ab, an) * (180/3.1415))*sign + " градусов");
 
 /*function qwe() {
 	  alert( 'Привет' );
