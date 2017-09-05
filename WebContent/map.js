@@ -255,14 +255,14 @@ ymaps.ready(function init(){
  * @param coords Точка, в тоторой нужно создать метку
  * @return Созданная метка
  */
-function createPlacemarkCar(coords) {
+function createPlacemarkCar(coords, sign, rotate) {
 	return new ymaps.Placemark(coords, {}, {
 		iconLayout: 'default#imageWithContent',
-		iconImageHref: 'car.png',
+		iconImageHref: 'cars/car' + sign + '' + rotate + '.png',
 		iconImageSize: [48, 48],
 		
 		// Смещает картинку, чтобы "хвостик" метки указывал прямо на точку дороги
-		iconImageOffset: [-24, -48],
+		iconImageOffset: [-24, -24],
 	    // Смещение слоя с содержимым относительно слоя с картинкой.
 	    //iconContentOffset: [15, 15],
 		
@@ -631,26 +631,49 @@ function carsDriver() {
 	  s--;
 	  try {
 		  for (var i = 0; i < metka.length; i++) {
-		  if (metka[i]) {
-			  metka[i].geometry.setCoordinates(car[s+172*i]);
-			}
-			// Если нет – создаем.
-			else {
-				var pm= createPlacemarkCar(car[s+172*i]);
-			  	metka[i] = pm;
-			  	mapOutside.geoObjects.add(pm);
-			}
+		
+		  	var rotate = angleBetweenTwoVectors(car[s+172*i], car[(s+172*i)-1]);
+		  	var sign = rotate > 0 ? '' : '-';
+		  	rotate = rotate > 0 ? rotate : -rotate;
+		  	
+		  	rotate = Math.round(rotate/15)*15;
+		  	
+			var pm= createPlacemarkCar(car[s+172*i], sign, rotate);
+		  	mapOutside.geoObjects.add(pm);
+		  	if (metka[i])
+			  	mapOutside.geoObjects.remove(metka[i]);
+		  	metka[i] = pm;
 		  }
 	  } catch (err) {}
-	}
+}
+
+/*var metkiForDelete;
+mapOutside.geoObjects.event.add('add', function(e) {
+	
+})*/
 
 var s = 172;
 var metka = [undefined, undefined];
 setInterval(carsDriver, 1000);
 
-//Функция для вычисления угла между 2 векторами
+//Функция для вычисления угла, на который нужно повернуть картику. Принимает в качестве аргументов две смежные точки маршрута
 var angleBetweenTwoVectors = function(vector1, vector2) {
-    // скалярное произведение векторов
+	if (vector1 == vector2)
+		return 0;
+	
+	var v1 = vector1;
+	var v2 = vector2;
+
+	var ab = [v2[0]-v1[0], v2[1]-v1[1]];
+	var an = [v2[0]-v1[0]+1, v2[1]-v1[1]];
+	var n = [v1[0]+1, v1[1]];
+	var an_perp = [an[1], an[0]];
+	var sign =  ((ab[0]*an_perp[0]+ab[1]*an_perp[1]) < 0 ? -1 : 1);
+	
+	vector1 = [v2[0]-v1[0], v2[1]-v1[1]];
+	vector2 = [v2[0]-v1[0]+1, v2[1]-v1[1]];
+	
+	// скалярное произведение векторов
     var scalMultVectors = vector1.reduce(function(sum, current, i) {
         return sum + (current * vector2[i])
     }, 0);
@@ -670,23 +693,14 @@ var angleBetweenTwoVectors = function(vector1, vector2) {
     // Вычисляем косинус угла между векторами
     var cosA = scalMultVectors / (moduleVector(vector1) * moduleVector(vector2));
     console.log("cos(" + cosA + ")");
-    return Math.acos(cosA);
+    return Math.acos(cosA)*(180/3.1415)*sign;
 
 }
 
 // test
-var v1 = [52.287570, 104.282750];
-var v2 = [52.287570, 104.282700];
-
-var ab = [v2[0]-v1[0], v2[1]-v1[1]];
-var an = [v2[0]-v1[0]+1, v2[1]-v1[1]];
-var n = [v1[0]+1, v1[1]];
-//console.log((angleBetweenTwoVectors(ab, an) * (180/3.1415)) + " градусов");
-
-var an_perp = [an[1], an[0]];
-var sign =  ((ab[0]*an_perp[0]+ab[1]*an_perp[1]) < 0 ? -1 : 1);
-
-console.log((angleBetweenTwoVectors(ab, an) * (180/3.1415))*sign + " градусов");
+var v1 = [52.287572, 104.282747];
+var v2 = [52.287486, 104.282753];
+console.log((angleBetweenTwoVectors(v1, v2)));
 
 /*function qwe() {
 	  alert( 'Привет' );
