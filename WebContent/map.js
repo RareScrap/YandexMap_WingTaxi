@@ -638,11 +638,22 @@ function carsDriver() {
 		  	
 		  	rotate = Math.round(rotate/15)*15;
 		  	
-			var pm= createPlacemarkCar(car[s+172*i], sign, rotate);
+		  	if (metka[i]) {
+			  metka[i].geometry.setCoordinates(car[s+172*i]);
+			  metka[i].options.set('iconImageHref', 'cars/car' + sign + '' + rotate + '.png')
+			}
+			// Если нет – создаем.
+			else {
+				var pm= createPlacemarkCar(car[s+172*i], sign, rotate);
+			  	metka[i] = pm;
+			  	mapOutside.geoObjects.add(pm);
+			}
+		  	
+			/*var pm= createPlacemarkCar(car[s+172*i], sign, rotate);
 		  	mapOutside.geoObjects.add(pm);
 		  	if (metka[i])
 			  	mapOutside.geoObjects.remove(metka[i]);
-		  	metka[i] = pm;
+		  	metka[i] = pm;*/
 		  }
 	  } catch (err) {}
 }
