@@ -15,6 +15,14 @@ function init () {
 	    arr[i][1] = window.getDataJSInterface.getRoutePointCoord(i, 1);
 	  }*/
 	
+    var balloonLayout = ymaps.templateLayoutFactory.createClass(
+        "<div>", {
+            build: function () {
+                this.constructor.superclass.build.call(this);
+            }
+        }
+    );
+    
     /**
      * Создаем мультимаршрут.
      * Первым аргументом передаем модель либо объект описания модели.
@@ -27,7 +35,12 @@ function init () {
         referencePoints: arr
     }, {
         // Автоматически устанавливать границы карты так, чтобы маршрут был виден целиком.
-        boundsAutoApply: true
+        boundsAutoApply: true,
+        
+        balloonLayout: balloonLayout
+        
+        // Отключаем режим панели для балуна.
+        //balloonPanelMaxMapArea: 0
     });
 
     ymaps
@@ -40,7 +53,7 @@ function init () {
     }, {
         buttonMaxWidth: 300
     });
-   
+    
     // Ожидаем успешного построения маршрута
     multiRoute.model.events.add("requestsuccess", function(){
 		//window.updateDataJSInterface.updateRouteLength( multiRoute.getActiveRoute().properties.get('distance').value );
@@ -72,7 +85,6 @@ function init () {
 		        for (var j = 0; j < segments.length; j++) {
 		        	var myPlacemark = createPlacemark(segments[j].model.geometry._coordPath._coordinates[0]);
 					myMap.geoObjects.add(myPlacemark);
-		        	
 		            /*var street = segments[j].getStreet();
 		            moveList += ('Едем ' + segments[j].getHumanAction() + (street ? ' на ' + street : '') + ', проезжаем ' + segments[j].getLength() + ' м.,');
 		            moveList += '</br>'*/
