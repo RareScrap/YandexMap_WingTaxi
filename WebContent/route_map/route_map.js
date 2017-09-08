@@ -74,21 +74,49 @@ function init () {
 	        way,
 	        segments;
 	    // Получаем массив путей.
-		for (var g = 0; g < multiRoute.getRoutes().getLength(); g++) {
-			var route = multiRoute.getRoutes().get(g);
-		    for (var i = 0; i < route.getPaths().getLength(); i++) {
-		        way = route.getPaths().get(i);
-		        segments = way.getSegments();
+		for (var gg = 0; gg < multiRoute.getRoutes().getLength(); gg++) {
+			var asd1 = multiRoute.getRoutes();
+			var asd2 = multiRoute.getRoutes().get(gg).getPaths().getLength()
+			
+			var route = multiRoute.getRoutes().get(gg);
+			for (var i = 0; i < route.getPaths().getLength(); i++) {
+	            way = route.getPaths().get(i);
+	            segments = way.getSegments();
+	            for (var j = 0; j < segments.getLength(); j++) {
+	                var street = segments.get(j).model.geometry._coordPath._coordinates;//collectionComponent._baseArrayComponent._children;
+
+					try {
+						for (var g = 0; g < street.length; g++) {
+							var myPlacemark1 = createPlacemark(street[g]);
+							myMap.geoObjects.add(myPlacemark1);
+						}
+					} catch (err) {
+						var myPlacemark = createPlacemark(street[j]);
+						myMap.geoObjects.add(myPlacemark);
+					}
+
+	                moveList += street;
+	                moveList += '</br>'
+	            }
 		        
-		        segments = segments._collectionComponent._baseArrayComponent._children;
-		        
-		        for (var j = 0; j < segments.length; j++) {
+		        /*for (var j = 0; j < segments.length; j++) {
 		        	var myPlacemark = createPlacemark(segments[j].model.geometry._coordPath._coordinates[0]);
 					myMap.geoObjects.add(myPlacemark);
+					var myPlacemark1 = createPlacemark(segments[j].model.geometry._coordPath._coordinates[1]);
+					myMap.geoObjects.add(myPlacemark1);*/
+					
+					/*for (var ja = 0; ja < way.model.properties._data.coordinates.length; ja++) {
+						var myPlacemark2 = createPlacemark(way.model.properties._data.coordinates[1]);
+						myMap.geoObjects.add(myPlacemark2);
+					}*/
+					/*var myPlacemark2 = createPlacemark(segments[j].geometry._bounds[0]);
+					myMap.geoObjects.add(myPlacemark2);
+					var myPlacemark3 = createPlacemark(segments[j].geometry._bounds[1]);
+					myMap.geoObjects.add(myPlacemark3);*/
 		            /*var street = segments[j].getStreet();
 		            moveList += ('Едем ' + segments[j].getHumanAction() + (street ? ' на ' + street : '') + ', проезжаем ' + segments[j].getLength() + ' м.,');
 		            moveList += '</br>'*/
-		        }
+		        //}
 		    }
 		}
 	    moveList += 'Останавливаемся.';
