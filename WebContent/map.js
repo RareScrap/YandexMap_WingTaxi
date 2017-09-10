@@ -113,7 +113,7 @@ ymaps.ready(function init(){
         	// Отладочные координаты
         	var coords = [0, 0];
         	// Получение кооднинат с устройства
-        	//var coords = [parseFloat(window.gpsJavaScriptInterface.getUserLongitude()), parseFloat(window.gpsJavaScriptInterface.getUserLatitude())];
+        	var coords = [parseFloat(window.gpsJavaScriptInterface.getUserLongitude()), parseFloat(window.gpsJavaScriptInterface.getUserLatitude())];
 
         	// Установить центр карты в точке coords
         	myMap.panTo(coords, {
@@ -223,11 +223,11 @@ ymaps.ready(function init(){
 				});
 			
 			// Информирует окружение о том, что метка была передвинута
-			//window.updateDataJSInterface.updateAddress(coords[0], coords[1], firstGeoObject.getAddressLine());
+			window.updateDataJSInterface.updateAddress(coords[0], coords[1], firstGeoObject.getAddressLine());
 			
 			// Информируем окружение, что карта загружена
 			// TODO: Это лучшее место для этой строки?
-			//window.mapReadyJSInterface.mapReady();
+			window.mapReadyJSInterface.mapReady();
 		});
 	}
 	
