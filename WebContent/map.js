@@ -79,8 +79,9 @@ ymaps.ready(function init(){
     mySearchControl = new ymaps.control.SearchControl({
         options: {
             noPlacemark: false,
-            placeholderContent: "Вы можете ввести адрес самому",
-            size: "auto"
+            placeholderContent: "Ввести адрес самому",
+            size: "large",
+            provider: "yandex#search"
         }
     }),
 	// Результаты поиска будем помещать в коллекцию.
@@ -118,13 +119,20 @@ ymaps.ready(function init(){
 				});
 			}
 			// TODO: Зачем?
-			getAddress(coords);
+			//getAddress(coords);
 	    	
 	    	// Помещаем результат в коллекцию
-	       mySearchResults.add(res);
+	       //mySearchResults.add(res);
+			var a = document.getElementsByClassName('ymaps-2-1-55-balloon__tail')//[0].style.height = '0%';
 	    });
 	}).add('submit', function () { // Очистить результаты поиска при отправке реквеста о получении новых
 	        mySearchResults.removeAll();
+    }).add('resultshow', function () { // Очистить результаты поиска при отправке реквеста о получении новых
+    	//var a = document.getElementsByClassName('ymaps-2-1-55-balloon__tail').style.height = '0%';
+    	/*var style = document.styleSheets[0];
+    	var styleSel = ".ymaps-2-1-55-balloon__tail::after";              //define selector
+        var styleDec = "height: 0%;"; 
+        style.insertRule(styleSel+'{'+styleDec+'}', style.cssRules.length);*/
     })
 	
 	// Задаем функционал GPS контрола

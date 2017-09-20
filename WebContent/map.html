@@ -5,12 +5,37 @@
     <meta name="viewport" content="width=device-width,height=device-height, user-scalable=no" />
     <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"> </script>
 	<style>
+		/* Убираем хвостик балуна */
+		.ymaps-2-1-55-balloon__tail {
+            visibility: hidden;
+        }
+		.ymaps-2-1-55-balloon__tail::after {
+            visibility: hidden;
+        }
+	
+		.ymaps-2-1-55-balloon {
+            width: 0%;
+            height: 0%;
+        }
+		
+		.ymaps-2-1-55-copyright {
+            width: 0%;
+            height: 0%;
+        }
+	
+		.ymaps-2-1-55-controls__control_toolbar {
+			zoom: 1.25;
+		}
+		
+		.ymaps-2-1-55-zoom {
+			zoom: 1.25;
+		}
         html, body, #map {
             width: 100%;
             height: 100%;
             margin: 0;
             padding: 0;
-        }
+       }
     </style>
     
 	<!-- Класс кнопки геолокации -->
