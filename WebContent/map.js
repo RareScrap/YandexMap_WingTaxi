@@ -80,7 +80,7 @@ ymaps.ready(function init(){
         options: {
             noPlacemark: false,
             placeholderContent: "Ввести адрес самому",
-            size: "large",
+            size: "small",
             provider: "yandex#search"
         }
     }),
@@ -118,8 +118,10 @@ ymaps.ready(function init(){
 					getAddress(myPlacemark.geometry.getCoordinates());
 				});
 			}
+			myMap.setCenter(coords, 15, {})
+			
 			// TODO: Зачем?
-			//getAddress(coords);
+			getAddress(coords);
 	    	
 	    	// Помещаем результат в коллекцию
 	       //mySearchResults.add(res);
@@ -288,9 +290,16 @@ ymaps.ready(function init(){
 	 */
 	function createPlacemark(coords) {
 		return new ymaps.Placemark(coords, {
-			iconCaption: 'поиск...'
+			iconCaption: 'поиск...',
 		}, {
-			preset: 'islands#violetDotIconWithCaption',
+			iconLayout: 'default#imageWithContent',
+			iconImageHref: 'me.png',
+			iconImageSize: [48, 60],
+			
+			 iconImageOffset: [-24, -60],
+	         // Смещение слоя с содержимым относительно слоя с картинкой.
+	         //iconContentOffset: [15, 15],
+			//preset: 'islands#violetDotIconWithCaption',
 			draggable: false
 		});
 	}
