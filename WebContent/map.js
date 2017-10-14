@@ -1,13 +1,44 @@
 /**
  * Функция-конструтор GPS контрола для Яндекс карты
- * @param params Параменры контрола (модель функциональности?)
- * @param options Опции контрола (модель поведения?)
+ * 
+ * @param params
+ *            Параменры контрола (модель функциональности?)
+ * @param options
+ *            Опции контрола (модель поведения?)
  * @returns GPS контрол
  */
 function GeolocationButton(params, options) {
     GeolocationButton.superclass.constructor.call(this, params, options);
 }
 
+var setPlacemarkGPS;
+var myPlacemarkHolder;
+var getAdressOutside;
+
+function function_two(long, lat) {
+	//mapOutside.geoObjects.add(setPlacemarkGPS([long, lat]));
+	if (myPlacemarkHolder) {
+		myPlacemarkHolder.geometry.setCoordinates([long, lat]);
+	}
+	// Если нет – создаем.
+	else {
+		myPlacemarkHolder = setPlacemarkGPS([long, lat]);
+		mapOutside.geoObjects.add(myPlacemarkHolder);
+		
+		// TODO: Зачем?
+		// Слушаем событие окончания перетаскивания на метке.
+		myPlacemarkHolder.events.add('dragend', function () {
+			getAddress(myPlacemarkHolder.geometry.getCoordinates());
+		});
+	}
+
+	// TODO: Зачем?
+	getAdressOutside([long, lat]);
+	mapOutside.panTo([long, lat], {
+		// Разрешает уменьшать и затем увеличивать зум карты при перемещении к заданной точке
+        flying: true
+    })
+}
 
 /**
  * Переменная, предоставляющая доступ к переменной внутри функции init()
@@ -29,9 +60,13 @@ ymaps.ready(function init(){
 	myMap.options.set('yandexMapDisablePoiInteractivity', true);
 	
 	// Создаем обьект первоначальной метки
-	var myPlacemark = createPlacemark([52.286387, 104.280660]); // Место - сквер кирово
-	myMap.geoObjects.add(myPlacemark); // Добавляем метку на карту
-	getAddress([52.286387, 104.280660]); // Получаем инфу о месте в хит метки (myPlacemark уже есть в getAddress())
+	myPlacemarkHolder = createPlacemark([52.286387, 104.280660]); // Место -
+																	// сквер
+																	// кирово
+	myMap.geoObjects.add(myPlacemarkHolder); // Добавляем метку на карту
+	getAddress([52.286387, 104.280660]); // Получаем инфу о месте в хит метки
+											// (myPlacemark уже есть в
+											// getAddress())
 	
 	// Временная заплатка - хуярим статичные машины
 	var myPlacemark1 = createPlacemarkCar([52.281286, 104.295698], "", 0);
@@ -104,18 +139,18 @@ ymaps.ready(function init(){
 	    	var coords = res.geometry._coordinates;
 	    	
 			// Если метка уже создана – просто передвигаем ее.
-			if (myPlacemark) {
-				myPlacemark.geometry.setCoordinates(coords);
+			if (myPlacemarkHolder) {
+				myPlacemarkHolder.geometry.setCoordinates(coords);
 			}
 			// Если нет – создаем.
 			else {
-				myPlacemark = createPlacemark(coords);
-				myMap.geoObjects.add(myPlacemark);
+				myPlacemarkHolder = createPlacemark(coords);
+				myMap.geoObjects.add(myPlacemarkHolder);
 				
 				// TODO: Зачем?
 				// Слушаем событие окончания перетаскивания на метке.
-				myPlacemark.events.add('dragend', function () {
-					getAddress(myPlacemark.geometry.getCoordinates());
+				myPlacemarkHolder.events.add('dragend', function () {
+					getAddress(myPlacemarkHolder.geometry.getCoordinates());
 				});
 			}
 			myMap.setCenter(coords, 15, {})
@@ -124,17 +159,25 @@ ymaps.ready(function init(){
 			getAddress(coords);
 	    	
 	    	// Помещаем результат в коллекцию
-	       //mySearchResults.add(res);
-			var a = document.getElementsByClassName('ymaps-2-1-55-balloon__tail')//[0].style.height = '0%';
+	       // mySearchResults.add(res);
+			var a = document.getElementsByClassName('ymaps-2-1-55-balloon__tail')// [0].style.height
+																					// =
+																					// '0%';
 	    });
-	}).add('submit', function () { // Очистить результаты поиска при отправке реквеста о получении новых
+	}).add('submit', function () { // Очистить результаты поиска при отправке
+									// реквеста о получении новых
 	        mySearchResults.removeAll();
-    }).add('resultshow', function () { // Очистить результаты поиска при отправке реквеста о получении новых
-    	//var a = document.getElementsByClassName('ymaps-2-1-55-balloon__tail').style.height = '0%';
-    	/*var style = document.styleSheets[0];
-    	var styleSel = ".ymaps-2-1-55-balloon__tail::after";              //define selector
-        var styleDec = "height: 0%;"; 
-        style.insertRule(styleSel+'{'+styleDec+'}', style.cssRules.length);*/
+    }).add('resultshow', function () { // Очистить результаты поиска при
+										// отправке реквеста о получении новых
+    	// var a =
+		// document.getElementsByClassName('ymaps-2-1-55-balloon__tail').style.height
+		// = '0%';
+    	/*
+		 * var style = document.styleSheets[0]; var styleSel =
+		 * ".ymaps-2-1-55-balloon__tail::after"; //define selector var styleDec =
+		 * "height: 0%;"; style.insertRule(styleSel+'{'+styleDec+'}',
+		 * style.cssRules.length);
+		 */
     })
 	
 	// Задаем функционал GPS контрола
@@ -162,31 +205,7 @@ ymaps.ready(function init(){
         },
         // Вызывается при клике на кнопку
         _onBtnClick: function (e) {
-        	// Отладочные координаты
-        	//var coords = [0, 0];
-        	// Получение кооднинат с устройства
-        	var coords = [parseFloat(window.gpsJavaScriptInterface.getUserLongitude()), parseFloat(window.gpsJavaScriptInterface.getUserLatitude())];
-
-        	// Установить центр карты в точке coords
-        	myMap.panTo(coords, {
-        		// Разрешает уменьшать и затем увеличивать зум карты при перемещении к заданной точке
-                flying: true
-            })
-        	
-			// Если метка уже создана – просто передвигаем ее.
-			if (myPlacemark) {
-				myPlacemark.geometry.setCoordinates(coords);
-			}
-			// Если нет – создаем.
-			else {
-				myPlacemark = createPlacemark(coords);
-				myMap.geoObjects.add(myPlacemark);
-				// TODO: Удалить
-				// Слушаем событие окончания перетаскивания на метке.
-				myPlacemark.events.add('dragend', function () {
-					getAddress(myPlacemark.geometry.getCoordinates());
-				});
-			}
+        	function_two(1, 1);
 
         	// TODO: Хачем это?
 			getAddress(coords);
@@ -204,7 +223,8 @@ ymaps.ready(function init(){
             title : 'Определить местоположение'
         },
         geolocationOptions: {
-            enableHighAccuracy : true // Режим получения наиболее точных данных
+            enableHighAccuracy : true // Режим получения наиболее точных
+										// данных
         }
     }, {
     	// TODO: Зачем это?
@@ -214,24 +234,25 @@ ymaps.ready(function init(){
     // Добавим GPS контрол на карту
     myMap.controls.add(button, { top : 5, left : 5 });
 
-    // Обработка события, возникающего при щелчке левой кнопкой мыши в любой точке карты.
+    // Обработка события, возникающего при щелчке левой кнопкой мыши в любой
+	// точке карты.
 	myMap.events.add('click', function (e) {
-		// Получаем координаты косания 
+		// Получаем координаты косания
 		var coords = e.get('coords');
 
 		// Если метка уже создана – просто передвигаем ее.
-		if (myPlacemark) {
-			myPlacemark.geometry.setCoordinates(coords);
+		if (myPlacemarkHolder) {
+			myPlacemarkHolder.geometry.setCoordinates(coords);
 		}
 		// Если нет – создаем.
 		else {
-			myPlacemark = createPlacemark(coords);
-			myMap.geoObjects.add(myPlacemark);
+			myPlacemarkHolder = createPlacemark(coords);
+			myMap.geoObjects.add(myPlacemarkHolder);
 			
 			// TODO: Зачем?
 			// Слушаем событие окончания перетаскивания на метке.
-			myPlacemark.events.add('dragend', function () {
-				getAddress(myPlacemark.geometry.getCoordinates());
+			myPlacemarkHolder.events.add('dragend', function () {
+				getAddress(myPlacemarkHolder.geometry.getCoordinates());
 			});
 		}
 
@@ -240,12 +261,15 @@ ymaps.ready(function init(){
 	});
 	
 	/**
-	 * Получает информацию о месте в точке данной и записывае ее в хинт метки myPlacemark
-	 * @param coords Место, о котором нужно получить информацию
+	 * Получает информацию о месте в точке данной и записывае ее в хинт метки
+	 * myPlacemark
+	 * 
+	 * @param coords
+	 *            Место, о котором нужно получить информацию
 	 */
 	function getAddress(coords) {
 		// Устанавливаем заглушку, когда информация о месте еще не получена
-		myPlacemark.properties.set('iconCaption', 'поиск...');
+		myPlacemarkHolder.properties.set('iconCaption', 'поиск...');
 		
 		// Обработка полученной информации
 		ymaps.geocode(coords).then(function (res) {
@@ -253,25 +277,32 @@ ymaps.ready(function init(){
 			var firstGeoObject = res.geoObjects.get(0);
 			
 			// TODO: Нужно сохранять город, чтобы передать его на сервер
-			// Сохраняем название населенного пункта или вышестоящее административно-территориальное образование
+			// Сохраняем название населенного пункта или вышестоящее
+			// административно-территориальное образование
 			var city = firstGeoObject.getLocalities().length ? firstGeoObject.getLocalities() : firstGeoObject.getAdministrativeAreas();
 
 			// Записываем загруженную информацию в хинт myPlacemark
-			myPlacemark.properties
+			myPlacemarkHolder.properties
 				.set({
 					// Формируем строку с данными об объекте.
 					iconCaption: [
-						// Получаем путь до топонима, если метод вернул null, запрашиваем наименование здания. Если и его нет - возвращаем образование внтури района (микрорайон)
+						// Получаем путь до топонима, если метод вернул null,
+						// запрашиваем наименование здания. Если и его нет -
+						// возвращаем образование внтури района (микрорайон)
 						firstGeoObject.getThoroughfare() || firstGeoObject.getPremise() || firstGeoObject.getLocalities()[1],
 						// Номер здания
 						firstGeoObject.getPremiseNumber()
 						
 						// Полный адрес метки
-						//firstGeoObject.getAddressLine()
-					].filter(Boolean).join(', '), // Применяем фильтр, разделяя токены адреса запятой
+						// firstGeoObject.getAddressLine()
+					].filter(Boolean).join(', '), // Применяем фильтр,
+													// разделяя токены адреса
+													// запятой
 					
 					// Тестовая строка для тестирования GPS
-					//balloonContent: window.gpsJavaScriptInterface.getUserLatitude() + "_" + window.gpsJavaScriptInterface.getUserLongitude()
+					// balloonContent:
+					// window.gpsJavaScriptInterface.getUserLatitude() + "_" +
+					// window.gpsJavaScriptInterface.getUserLongitude()
 				});
 			
 			// Информирует окружение о том, что метка была передвинута
@@ -282,13 +313,17 @@ ymaps.ready(function init(){
 			window.mapReadyJSInterface.mapReady();
 		});
 	}
+	getAdressOutside = getAddress;
+	
 	
 	/**
 	 * Создает метку выброра адреса
-	 * @param coords Точка, в тоторой нужно создать метку
+	 * 
+	 * @param coords
+	 *            Точка, в тоторой нужно создать метку
 	 * @return Созданная метка
 	 */
-	function createPlacemark(coords) {
+	/* setPlacemarkGPS = */function createPlacemark(coords) {
 		return new ymaps.Placemark(coords, {
 			iconCaption: 'поиск...',
 		}, {
@@ -298,11 +333,12 @@ ymaps.ready(function init(){
 			
 			 iconImageOffset: [-24, -60],
 	         // Смещение слоя с содержимым относительно слоя с картинкой.
-	         //iconContentOffset: [15, 15],
-			//preset: 'islands#violetDotIconWithCaption',
+	         // iconContentOffset: [15, 15],
+			// preset: 'islands#violetDotIconWithCaption',
 			draggable: false
 		});
 	}
+	setPlacemarkGPS = createPlacemark;
 
 	
 	// Сохранение готовой карты во внешней переменной
@@ -311,7 +347,9 @@ ymaps.ready(function init(){
 
 /**
  * Создает метку машины такси
- * @param coords Точка, в тоторой нужно создать метку
+ * 
+ * @param coords
+ *            Точка, в тоторой нужно создать метку
  * @return Созданная метка
  */
 function createPlacemarkCar(coords, sign, rotate) {
@@ -320,10 +358,11 @@ function createPlacemarkCar(coords, sign, rotate) {
 		iconImageHref: 'cars/car' + sign + '' + rotate + '.png',
 		iconImageSize: [48, 48],
 		
-		// Смещает картинку, чтобы "хвостик" метки указывал прямо на точку дороги
+		// Смещает картинку, чтобы "хвостик" метки указывал прямо на точку
+		// дороги
 		iconImageOffset: [-24, -24],
 	    // Смещение слоя с содержимым относительно слоя с картинкой.
-	    //iconContentOffset: [15, 15],
+	    // iconContentOffset: [15, 15],
 		
 		preset: 'islands#violetDotIconWithCaption',
 		// Отлючает возможность переноса
@@ -332,8 +371,9 @@ function createPlacemarkCar(coords, sign, rotate) {
 }
 
 /**
- * Функция, содержащая в себе координаты точек маршрута для всех меток машин. При вызове,
- * выставляет все метки машин в их s-тую точку (s - внешняя переменная).
+ * Функция, содержащая в себе координаты точек маршрута для всех меток машин.
+ * При вызове, выставляет все метки машин в их s-тую точку (s - внешняя
+ * переменная).
  */
 function carsDriver() {
 	  var car = [
@@ -2078,7 +2118,7 @@ function carsDriver() {
 		  [52.267542, 104.299288]
 	  ];
 	  
-	  //alert( "тик" );
+	  // alert( "тик" );
 	  s--;
 	  try {
 		  for (var i = 0; i < metka.length; i++) {
@@ -2100,25 +2140,26 @@ function carsDriver() {
 			  	mapOutside.geoObjects.add(pm);
 			}
 		  	
-			/*var pm= createPlacemarkCar(car[s+172*i], sign, rotate);
-		  	mapOutside.geoObjects.add(pm);
-		  	if (metka[i])
-			  	mapOutside.geoObjects.remove(metka[i]);
-		  	metka[i] = pm;*/
+			/*
+			 * var pm= createPlacemarkCar(car[s+172*i], sign, rotate);
+			 * mapOutside.geoObjects.add(pm); if (metka[i])
+			 * mapOutside.geoObjects.remove(metka[i]); metka[i] = pm;
+			 */
 		  }
 	  } catch (err) {}
 }
 
-/*var metkiForDelete;
-mapOutside.geoObjects.event.add('add', function(e) {
-	
-})*/
+/*
+ * var metkiForDelete; mapOutside.geoObjects.event.add('add', function(e) {
+ *  })
+ */
 
 var s = 172;
 var metka = [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined];
 setInterval(carsDriver, 1000);
 
-//Функция для вычисления угла, на который нужно повернуть картику. Принимает в качестве аргументов две смежные точки маршрута
+// Функция для вычисления угла, на который нужно повернуть картику. Принимает в
+// качестве аргументов две смежные точки маршрута
 var angleBetweenTwoVectors = function(vector1, vector2) {
 	if (vector1 == vector2)
 		return 0;
@@ -2164,7 +2205,6 @@ var v1 = [52.287572, 104.282747];
 var v2 = [52.287486, 104.282753];
 console.log((angleBetweenTwoVectors(v1, v2)));
 
-/*function qwe() {
-	  alert( 'Привет' );
-	}
-setInterval(qwe(), 1000);*/
+/*
+ * function qwe() { alert( 'Привет' ); } setInterval(qwe(), 1000);
+ */
