@@ -1,18 +1,8 @@
-/**
- * Функция-конструтор GPS контрола для Яндекс карты
- * 
- * @param params
- *            Параменры контрола (модель функциональности?)
- * @param options
- *            Опции контрола (модель поведения?)
- * @returns GPS контрол
- */
-function GeolocationButton(params, options) {
-    GeolocationButton.superclass.constructor.call(this, params, options);
-}
-
+/** Холдер для функции createPlacemark(), хранящейся внутри яндекс карты */
 var setPlacemarkGPS;
+/** Холдер для доступа к метке выбранного адреса, хранящегося внутри яндекс карты */
 var myPlacemarkHolder;
+/** Холдер для функции getAddress(), хранящейся внутри яндекс карты*/
 var getAdressOutside;
 
 function function_two(long, lat) {
@@ -53,7 +43,7 @@ ymaps.ready(function init(){
 	var myMap = new ymaps.Map('map', {
 			center: [52.286387, 104.280660], // Центрируем на сквере кирова
 			zoom: 15,
-			controls: ['zoomControl']
+			controls: []
 		});
 	
 	// Отключаем интерактивность (инфу по клику на значки)
@@ -109,130 +99,6 @@ ymaps.ready(function init(){
 	myMap.geoObjects.add(myPlacemark1);
 	myPlacemark1 = createPlacemarkCar([52.276074, 104.321705], "", 0);
 	myMap.geoObjects.add(myPlacemark1);
-	
-	 // Создаем экземпляр класса ymaps.control.SearchControl
-    mySearchControl = new ymaps.control.SearchControl({
-        options: {
-            noPlacemark: false,
-            placeholderContent: "Ввести адрес самому",
-            size: "small",
-            provider: "yandex#search"
-        }
-    }),
-	// Результаты поиска будем помещать в коллекцию.
-    mySearchResults = new ymaps.GeoObjectCollection(null, {
-        hintContentLayout: ymaps.templateLayoutFactory.createClass('$[properties.name]')
-    });
-    
-    // Добавление контрола на карту
-	myMap.controls.add(mySearchControl);
-	
-	// Обработка кликнутых результатов поиска
-	mySearchControl.events.add('resultselect', function (e) {
-		// Получение результата, по которому был сделан клик
-		var index = e.get('index');
-	    var test = mySearchControl.getResult(index);
-	    
-	    // Обработка полученного результата
-	    mySearchControl.getResult(index).then(function (res) {
-	    	// Получение координат результата
-	    	var coords = res.geometry._coordinates;
-	    	
-			// Если метка уже создана – просто передвигаем ее.
-			if (myPlacemarkHolder) {
-				myPlacemarkHolder.geometry.setCoordinates(coords);
-			}
-			// Если нет – создаем.
-			else {
-				myPlacemarkHolder = createPlacemark(coords);
-				myMap.geoObjects.add(myPlacemarkHolder);
-				
-				// TODO: Зачем?
-				// Слушаем событие окончания перетаскивания на метке.
-				myPlacemarkHolder.events.add('dragend', function () {
-					getAddress(myPlacemarkHolder.geometry.getCoordinates());
-				});
-			}
-			myMap.setCenter(coords, 15, {})
-			
-			// TODO: Зачем?
-			getAddress(coords);
-	    	
-	    	// Помещаем результат в коллекцию
-	       // mySearchResults.add(res);
-			var a = document.getElementsByClassName('ymaps-2-1-55-balloon__tail')// [0].style.height
-																					// =
-																					// '0%';
-	    });
-	}).add('submit', function () { // Очистить результаты поиска при отправке
-									// реквеста о получении новых
-	        mySearchResults.removeAll();
-    }).add('resultshow', function () { // Очистить результаты поиска при
-										// отправке реквеста о получении новых
-    	// var a =
-		// document.getElementsByClassName('ymaps-2-1-55-balloon__tail').style.height
-		// = '0%';
-    	/*
-		 * var style = document.styleSheets[0]; var styleSel =
-		 * ".ymaps-2-1-55-balloon__tail::after"; //define selector var styleDec =
-		 * "height: 0%;"; style.insertRule(styleSel+'{'+styleDec+'}',
-		 * style.cssRules.length);
-		 */
-    })
-	
-	// Задаем функционал GPS контрола
-	ymaps.util.augment(GeolocationButton, ymaps.control.Button, {
-		// Добавление контрола на карту
-        onAddToMap: function () {
-            GeolocationButton.superclass.onAddToMap.apply(this, arguments);
-            ymaps.option.presetStorage.add('geolocation#icon', {
-                iconImageHref: 'man.png',
-                iconImageSize: [27, 26],
-                iconImageOffset: [-10, -24]
-            });
-
-            // Установка обработчика клика по кнопке
-            this.events.add('click', this._onBtnClick, this);
-        },
-        // Функция удаления контрола
-        onRemoveFromMap: function () {
-            this.events.remove('click', this._onBtnClick, this);
-            this.hint = null;
-            ymaps.option.presetStorage.remove('geolocation#icon');
-
-            // Вызов суперкласса
-            GeolocationButton.superclass.onRemoveFromMap.apply(this, arguments);
-        },
-        // Вызывается при клике на кнопку
-        _onBtnClick: function (e) {
-        	function_two(1, 1);
-
-        	// TODO: Хачем это?
-			getAddress(coords);
-        },
-        // Создает эффект нажатой кнопки
-        toggleIconImage: function (image) {
-            this.data.set('image', image);
-        }
-    });
-	
-	// Создаем GPS контрол с заданным функционалом
-    var button = new GeolocationButton({
-        data : {
-            image : 'wifi.png',
-            title : 'Определить местоположение'
-        },
-        geolocationOptions: {
-            enableHighAccuracy : true // Режим получения наиболее точных
-										// данных
-        }
-    }, {
-    	// TODO: Зачем это?
-        // Зададим опции для кнопки.
-        selectOnClick: false
-    });
-    // Добавим GPS контрол на карту
-    myMap.controls.add(button, { top : 5, left : 5 });
 
     // Обработка события, возникающего при щелчке левой кнопкой мыши в любой
 	// точке карты.
